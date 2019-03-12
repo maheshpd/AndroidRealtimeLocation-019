@@ -38,7 +38,7 @@ import io.paperdb.Paper;
 
 public class MainActivity extends AppCompatActivity {
     DatabaseReference user_information;
-    private static final int MY_REQUEST_CODE = 7117; //any numbeer you want
+    private static final int MY_REQUEST_CODE = 7117; //any number you want
     List<AuthUI.IdpConfig> providers;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                                     Common.loggedUser = dataSnapshot.child(firebaseUser.getUid()).getValue(User.class);
                                 }
 
-                                //Save UID tostorage to update locationfrom background
+                                //Save UID storage to update location from background
                                 Paper.book().write(Common.USER_UID_SAVE_KEY,Common.loggedUser.getUid());
                                 updateToken(firebaseUser);
                                 setupUI();
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                Toast.makeText(MainActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
