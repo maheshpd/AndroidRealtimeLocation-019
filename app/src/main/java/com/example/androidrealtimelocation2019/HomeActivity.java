@@ -1,5 +1,6 @@
 package com.example.androidrealtimelocation2019;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -59,7 +60,7 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_find_people) {
-            // Handle the camera action
+            startActivity(new Intent(HomeActivity.this,AllPeopleActivity.class));
         } else if (id == R.id.nav_add_people) {
 
         } else if (id == R.id.nav_sign_out) {
