@@ -26,4 +26,6 @@ public class UserViewHolder extends RecyclerView.ViewHolder implements View.OnCl
     public void onClick(View v) {
         iRecyclerItemClickListener.onItemClickListener(v,getAdapterPosition());
     }
+
+    //Firebase
 }
