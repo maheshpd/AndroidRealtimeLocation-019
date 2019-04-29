@@ -1,7 +1,9 @@
 package com.example.androidrealtimelocation2019.Activity;
 
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,8 +18,11 @@ import android.widget.Toast;
 
 import com.example.androidrealtimelocation2019.Interface.IRecyclerItemClickListener;
 import com.example.androidrealtimelocation2019.Interface.IfirebaseLoadDone;
+import com.example.androidrealtimelocation2019.Model.MyResponse;
+import com.example.androidrealtimelocation2019.Model.Request;
 import com.example.androidrealtimelocation2019.Model.User;
 import com.example.androidrealtimelocation2019.R;
+import com.example.androidrealtimelocation2019.Remote.IFCMService;
 import com.example.androidrealtimelocation2019.Utils.Common;
 import com.example.androidrealtimelocation2019.ViewHolder.UserViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -31,7 +36,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoadDone {
 
@@ -42,11 +55,17 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
     MaterialSearchBar searchBar;
     List<String> suggestList = new ArrayList<>();
 
+    IFCMService ifcmService;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_people);
+
+        //Init View
+        ifcmService = Common.getFCMService();
+
 
         //Init View
         searchBar = findViewById(R.id.material_search_bar);
@@ -133,7 +152,7 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
                 .build();
         adapter = new FirebaseRecyclerAdapter<User, UserViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull User model) {
+            protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull final User model) {
                 if (model.getEmail().equals(Common.loggedUser.getEmail())) {
                     holder.txt_user_email.setText(new StringBuilder(model.getEmail()).append(" (me)"));
                     holder.txt_user_email.setTypeface(holder.txt_user_email.getTypeface(), Typeface.ITALIC);
@@ -145,7 +164,7 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
                 holder.setiRecyclerItemClickListener(new IRecyclerItemClickListener() {
                     @Override
                     public void onItemClickListener(View view, int position) {
-                        //Implement late
+                        showDialogRequest(model);
                     }
                 });
             }
@@ -164,12 +183,104 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
         recycler_all_user.setAdapter(adapter);
     }
 
+    private void showDialogRequest(final User model) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, R.style.MyRequestDialog);
+        alertDialog.setTitle("Request Friend");
+        alertDialog.setMessage("Do you want to sent request friend to " + model.getEmail());
+        alertDialog.setIcon(R.drawable.ic_account_circle_black_24dp);
+
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alertDialog.setPositiveButton("SEND", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Add to ACCEPT LIST
+                DatabaseReference acceptList = FirebaseDatabase.getInstance()
+                        .getReference(Common.USER_INFORMATION)
+                        .child(Common.loggedUser.getUid())
+                        .child(Common.ACCEPT_LIST);
+
+                acceptList.orderByKey().equalTo(model.getUid())
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.getValue() == null)  //If not friend before
+                                    sendFriendRequest(model);
+                                else
+                                    Toast.makeText(AllPeopleActivity.this, "you and" + model.getEmail() + "already are friend", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+            }
+        });
+        alertDialog.show();
+    }
+
+    private void sendFriendRequest(final User model) {
+        //Get Token to sent
+        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference(Common.TOKENS);
+        tokens.orderByKey().equalTo(model.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() == null)
+                            Toast.makeText(AllPeopleActivity.this, "Token error", Toast.LENGTH_SHORT).show();
+                        else {
+                            //Create Request
+                            Request request = new Request();
+
+                            //Create data
+                            Map<String, String> dataSend = new HashMap<>();
+                            dataSend.put(Common.FROM_UID, Common.loggedUser.getUid());
+                            dataSend.put(Common.FROM_NAME, Common.loggedUser.getEmail());
+                            dataSend.put(Common.TO_UID, model.getUid());
+                            dataSend.put(Common.TO_NAME, model.getEmail());
+
+                            request.setTo(dataSnapshot.child(model.getUid()).getValue(String.class));
+                            request.setData(dataSend);
+
+                            //Send
+                            compositeDisposable.add(ifcmService.sendFriendRequestToUser(request)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Consumer<MyResponse>() {
+                                        @Override
+                                        public void accept(MyResponse myResponse) throws Exception {
+                                            if (myResponse.success == 1)
+                                                Toast.makeText(AllPeopleActivity.this, "Request sent!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }, new Consumer<Throwable>() {
+                                        @Override
+                                        public void accept(Throwable throwable) throws Exception {
+                                            Toast.makeText(AllPeopleActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }));
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
     @Override
     protected void onStop() {
         if (adapter != null)
             adapter.stopListening();
         if (searchAdapter != null)
             searchAdapter.stopListening();
+        compositeDisposable.clear();
         super.onStop();
     }
 

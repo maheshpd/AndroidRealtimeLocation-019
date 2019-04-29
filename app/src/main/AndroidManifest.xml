@@ -12,8 +12,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activity.AllPeopleActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <service
+            android:name=".Service.MyFCMService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".Activity.AllPeopleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activity.HomeActivity"
             android:label="@string/title_activity_home"
