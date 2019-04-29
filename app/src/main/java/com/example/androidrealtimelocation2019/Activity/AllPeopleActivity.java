@@ -1,4 +1,4 @@
-package com.example.androidrealtimelocation2019;
+package com.example.androidrealtimelocation2019.Activity;
 
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.androidrealtimelocation2019.Interface.IRecyclerItemClickListener;
 import com.example.androidrealtimelocation2019.Interface.IfirebaseLoadDone;
 import com.example.androidrealtimelocation2019.Model.User;
+import com.example.androidrealtimelocation2019.R;
 import com.example.androidrealtimelocation2019.Utils.Common;
 import com.example.androidrealtimelocation2019.ViewHolder.UserViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;

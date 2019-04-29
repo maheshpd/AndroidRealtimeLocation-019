@@ -1,4 +1,4 @@
-package com.example.androidrealtimelocation2019;
+package com.example.androidrealtimelocation2019.Activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -30,7 +30,6 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.net.CookieHandler;
 import java.util.Arrays;
 import java.util.List;
 
@@ -148,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupUI() {
         //Navigate Home
-        startActivity(new Intent(MainActivity.this,HomeActivity.class));
+        startActivity(new Intent(MainActivity.this, HomeActivity.class));
         finish();
     }
 }

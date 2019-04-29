@@ -1,4 +1,4 @@
-package com.example.androidrealtimelocation2019;
+package com.example.androidrealtimelocation2019.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,8 +11,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
+
+import com.example.androidrealtimelocation2019.R;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -60,7 +61,7 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_find_people) {
-            startActivity(new Intent(HomeActivity.this,AllPeopleActivity.class));
+            startActivity(new Intent(HomeActivity.this, AllPeopleActivity.class));
         } else if (id == R.id.nav_add_people) {
 
         } else if (id == R.id.nav_sign_out) {
