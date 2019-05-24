@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.nav_find_people) {
             startActivity(new Intent(HomeActivity.this, AllPeopleActivity.class));
         } else if (id == R.id.nav_add_people) {
-
+            startActivity(new Intent(HomeActivity.this, FriendRequestActivity.class));
         } else if (id == R.id.nav_sign_out) {
 
         }

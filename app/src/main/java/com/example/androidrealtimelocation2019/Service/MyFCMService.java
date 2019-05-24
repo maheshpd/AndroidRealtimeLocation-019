@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
+import com.example.androidrealtimelocation2019.Model.User;
 import com.example.androidrealtimelocation2019.R;
 import com.example.androidrealtimelocation2019.Utils.Common;
 import com.example.androidrealtimelocation2019.Utils.NotificationHelper;
@@ -35,13 +36,27 @@ public class MyFCMService extends FirebaseMessagingService {
                 sendNotificationWithChannel(remoteMessage);
             else
                 sendNotification(remoteMessage);
+            addRequestToUserInformation(remoteMessage.getData());
         }
+    }
+
+    private void addRequestToUserInformation(Map<String, String> data) {
+        //Pending request
+        DatabaseReference friend_request = FirebaseDatabase.getInstance()
+                .getReference(Common.USER_INFORMATION)
+                .child(data.get(Common.TO_UID))
+                .child(Common.FRIEND_REQUEST);
+        User user = new User();
+        user.setUid(data.get(Common.FROM_NAME));
+        user.setEmail(data.get(Common.FROM_NAME));
+
+        friend_request.child(user.getUid()).setValue(user);
     }
 
     private void sendNotification(RemoteMessage remoteMessage) {
         Map<String,String> data = remoteMessage.getData();
         String title = "Friend Requests";
-        String content = "new friends request from"+data.get(Common.FROM_NAME);
+        String content = "new friends request  "+data.get(Common.FROM_NAME);
 
         Uri defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
