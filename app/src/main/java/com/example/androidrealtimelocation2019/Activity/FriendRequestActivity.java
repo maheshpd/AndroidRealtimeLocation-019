@@ -102,8 +102,48 @@ public class FriendRequestActivity extends AppCompatActivity implements Ifirebas
         loadSearchData();
     }
 
-    private void startSearch(String toString) {
+    private void startSearch(String searchValue) {
+        Query query = FirebaseDatabase.getInstance().getReference().child(Common.USER_INFORMATION)
+                .child(Common.loggedUser.getUid())
+                .child(Common.FRIEND_REQUEST)
+                .orderByChild("name")
+                .startAt(searchValue);
+        FirebaseRecyclerOptions<User> options = new FirebaseRecyclerOptions.Builder<User>()
+                .setQuery(query, User.class)
+                .build();
 
+        searchAdapter = new FirebaseRecyclerAdapter<User, FriendRequestViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull FriendRequestViewHolder holder, int position, @NonNull final User model) {
+                holder.txt_user_email.setText(model.getEmail());
+                holder.btn_accept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        deleteFriendRequest(model, false);
+                        addToAcceptList(model);
+                        addUserToFriendContact(model);
+                    }
+                });
+                holder.btn_decline.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //Delete
+                        deleteFriendRequest(model, true);
+                    }
+                });
+            }
+
+            @NonNull
+            @Override
+            public FriendRequestViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+                View itemView = LayoutInflater.from(viewGroup.getContext())
+                        .inflate(R.layout.layout_friend_request, viewGroup, false);
+                return new FriendRequestViewHolder(itemView);
+            }
+        };
+
+        searchAdapter.startListening();
+        recycler_all_user.setAdapter(searchAdapter);
     }
 
     private void loadFriendRequestList() {
@@ -191,45 +231,25 @@ public class FriendRequestActivity extends AppCompatActivity implements Ifirebas
     }
 
     private void loadSearchData() {
-        Query query = FirebaseDatabase.getInstance().getReference().child(Common.USER_INFORMATION)
+        final List<String> lstUserEmail = new ArrayList<>();
+        DatabaseReference userList = FirebaseDatabase.getInstance().getReference().child(Common.USER_INFORMATION)
                 .child(Common.loggedUser.getUid())
                 .child(Common.FRIEND_REQUEST);
-        FirebaseRecyclerOptions<User> options = new FirebaseRecyclerOptions.Builder<User>()
-                .setQuery(query, User.class)
-                .build();
-
-        searchAdapter = new FirebaseRecyclerAdapter<User, FriendRequestViewHolder>(options) {
+        userList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            protected void onBindViewHolder(@NonNull FriendRequestViewHolder holder, int position, @NonNull final User model) {
-                holder.txt_user_email.setText(model.getEmail());
-                holder.btn_accept.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        deleteFriendRequest(model, false);
-                        addToAcceptList(model);
-                        addUserToFriendContact(model);
-                    }
-                });
-                holder.btn_decline.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //Delete
-                        deleteFriendRequest(model, true);
-                    }
-                });
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot userSnapShot : dataSnapshot.getChildren()) {
+                    User user = userSnapShot.getValue(User.class);
+                    lstUserEmail.add(user.getEmail());
+                }
+                ifirebaseLoadDone.onFirebaseLoadUserNameDone(lstUserEmail);
             }
 
-            @NonNull
             @Override
-            public FriendRequestViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                View itemView = LayoutInflater.from(viewGroup.getContext())
-                        .inflate(R.layout.layout_friend_request, viewGroup, false);
-                return new FriendRequestViewHolder(itemView);
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                ifirebaseLoadDone.onFirebaseLoadFailed(databaseError.getMessage());
             }
-        };
-
-        searchAdapter.startListening();
-        recycler_all_user.setAdapter(searchAdapter);
+        });
     }
 
 

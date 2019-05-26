@@ -303,7 +303,7 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
                 .build();
         searchAdapter = new FirebaseRecyclerAdapter<User, UserViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull User model) {
+            protected void onBindViewHolder(@NonNull UserViewHolder holder, int position, @NonNull final User model) {
                 if (model.getEmail().equals(Common.loggedUser.getEmail())) {
                     holder.txt_user_email.setText(new StringBuilder(model.getEmail()).append(" (me)"));
                     holder.txt_user_email.setTypeface(holder.txt_user_email.getTypeface(), Typeface.ITALIC);
@@ -315,7 +315,7 @@ public class AllPeopleActivity extends AppCompatActivity implements IfirebaseLoa
                 holder.setiRecyclerItemClickListener(new IRecyclerItemClickListener() {
                     @Override
                     public void onItemClickListener(View view, int position) {
-                        //Implement late
+                        showDialogRequest(model);
                     }
                 });
             }

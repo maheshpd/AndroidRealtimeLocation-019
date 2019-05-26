@@ -1,0 +1,23 @@
+[
+  {
+    "featureType": "all",
+    "elementType": "labels.text.fill",
+    "style": [
+      {
+        "color":"#7c93a3"
+      },
+      {
+        "lightness": "-10"
+      }
+    ]
+  },
+  {
+    "featureType": "adminstrative.country",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  }
+]
