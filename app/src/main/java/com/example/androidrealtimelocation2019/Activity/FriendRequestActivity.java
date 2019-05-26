@@ -91,7 +91,7 @@ public class FriendRequestActivity extends AppCompatActivity implements Ifirebas
             }
         });
 
-        recycler_all_user = findViewById(R.id.recycler_all_people);
+        recycler_all_user = findViewById(R.id.recycler_FriendRequest_people);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recycler_all_user.setLayoutManager(layoutManager);
         recycler_all_user.addItemDecoration(new DividerItemDecoration(this, ((LinearLayoutManager) layoutManager).getOrientation()));
@@ -149,14 +149,16 @@ public class FriendRequestActivity extends AppCompatActivity implements Ifirebas
     }
 
     private void addUserToFriendContact(User model) {
+        //Friend add user
         DatabaseReference acceptList = FirebaseDatabase.getInstance()
                 .getReference(Common.USER_INFORMATION)
                 .child(model.getUid())
                 .child(Common.ACCEPT_LIST);
-        acceptList.child(model.getUid()).setValue(model);
+        acceptList.child(model.getUid()).setValue(Common.loggedUser);
     }
 
     private void addToAcceptList(User model) {
+        //User add friend
         DatabaseReference acceptList = FirebaseDatabase.getInstance()
                 .getReference(Common.USER_INFORMATION)
                 .child(Common.loggedUser.getUid())

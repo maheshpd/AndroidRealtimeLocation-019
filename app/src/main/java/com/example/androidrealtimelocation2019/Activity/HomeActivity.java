@@ -12,8 +12,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.androidrealtimelocation2019.R;
+import com.example.androidrealtimelocation2019.Utils.Common;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -42,6 +44,10 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView txt_user_logged = headerView.findViewById(R.id.txt_looged_email);
+        txt_user_logged.setText(Common.loggedUser.getEmail());
     }
 
     @Override
@@ -65,9 +71,7 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_add_people) {
             startActivity(new Intent(HomeActivity.this, FriendRequestActivity.class));
         } else if (id == R.id.nav_sign_out) {
-
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
